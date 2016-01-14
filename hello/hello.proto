@@ -1,0 +1,23 @@
+// Copyright 2016 Google, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+syntax = "proto3";
+
+package hello;
+
+// The hello service definition.
+service Hello {
+  // Sends a greeting.
+  rpc Say (Request) returns (Response);
+}
+
+// The request message containing the user's name.
+message Request {
+  string name = 1; 
+}
+
+// The response message containing the greeting.
+message Response {
+  string message = 1;	
+}
