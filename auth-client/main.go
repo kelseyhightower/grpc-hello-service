@@ -7,6 +7,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -58,5 +59,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(lm.Token)
+	err = ioutil.WriteFile(withConfigDir(".token"), []byte(lm.Token), 0400)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("wrote", withConfigDir(".token"))
 }

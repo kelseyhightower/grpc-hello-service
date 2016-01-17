@@ -1,8 +1,12 @@
 package main
 
 import (
+	"io/ioutil"
+	"time"
+
 	pb "github.com/kelseyhightower/grpc-hello-service/auth"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -15,6 +19,15 @@ import (
 type authServer struct{}
 
 func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
+	key, err := ioutil.ReadFile(withConfigDir("key.pem"))
+	if err != nil {
+		return nil, grpc.Errorf(codes.Internal, err.Error())
+	}
+	parsedKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Internal, err.Error())
+	}
+
 	user, err := getUser(boltdb, request.Username)
 	if err != nil {
 		return nil, err
@@ -23,7 +36,21 @@ func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.
 	if err != nil {
 		return nil, grpc.Errorf(codes.PermissionDenied, "")
 	}
-	return &pb.LoginResponse{"token"}, nil
+
+	token := jwt.New(jwt.SigningMethodRS256)
+	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	token.Claims["admin"] = user.IsAdmin
+	token.Claims["iss"] = "auth.service"
+	token.Claims["iat"] = time.Now().Unix()
+	token.Claims["email"] = user.Email
+	token.Claims["sub"] = user.Username
+
+	tokenString, err := token.SignedString(parsedKey)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Internal, err.Error())
+	}
+
+	return &pb.LoginResponse{tokenString}, nil
 }
 
 func getUser(db *bolt.DB, username string) (*pb.User, error) {

@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/kelseyhightower/grpc-hello-service/credentials/jwt"
 	pb "github.com/kelseyhightower/grpc-hello-service/hello"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
 
@@ -31,6 +32,7 @@ func main() {
 		serverAddr = flag.String("server-addr", "127.0.0.1:7900", "Hello service address.")
 		tlsCert    = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
 		tlsKey     = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
+		token      = flag.String("token", withConfigDir(".token"), "Path to JWT auth token.")
 	)
 	flag.Parse()
 
@@ -51,7 +53,14 @@ func main() {
 		RootCAs:      caCertPool,
 	})
 
-	conn, err := grpc.Dial(*serverAddr, grpc.WithTransportCredentials(creds))
+	jwtCreds, err := jwt.NewFromTokenFile(*token)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	conn, err := grpc.Dial(*serverAddr,
+		grpc.WithTransportCredentials(creds),
+		grpc.WithPerRPCCredentials(jwtCreds))
 	if err != nil {
 		log.Fatal(err)
 	}
