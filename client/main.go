@@ -7,44 +7,62 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"flag"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 
-	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
 	pb "github.com/kelseyhightower/grpc-hello-service/hello"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/oauth"
 )
 
+func withConfigDir(path string) string {
+	return filepath.Join(os.Getenv("HOME"), ".hello", "client", path)
+}
+
 func main() {
-	cert, err := tls.LoadX509KeyPair("client-cert.pem", "client-key.pem")
+	var (
+		caCert     = flag.String("ca-cert", withConfigDir("ca.pem"), "Trusted CA certificate.")
+		serverAddr = flag.String("server-addr", "127.0.0.1:443", "Hello service address.")
+		tlsCert    = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
+		tlsKey     = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
+	)
+	flag.Parse()
+
+	cert, err := tls.LoadX509KeyPair(*tlsCert, *tlsKey)
 	if err != nil {
-		log.Fatal("load client cert/key error:%v", err)
+		log.Fatal(err)
 	}
 
-	caCert, err := ioutil.ReadFile("ca-cert.pem")
+	rawCACert, err := ioutil.ReadFile(*caCert)
 	if err != nil {
-		log.Fatal("read ca cert file error:%v", err)
+		log.Fatal(err)
 	}
-
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
+	caCertPool.AppendCertsFromPEM(rawCACert)
 
 	creds := credentials.NewTLS(&tls.Config{
 		Certificates: []tls.Certificate{cert},
 		RootCAs:      caCertPool,
 	})
 
-	conn, err := grpc.Dial("127.0.0.1:8080",
-		grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(oauth.NewComputeEngine()))
+	conn, err := grpc.Dial(*serverAddr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
+
+	ac := pb.NewAuthClient(conn)
+	lm, err := ac.Login(context.Background(), &pb.LoginRequest{Username: "kelseyhightower", Password: "password"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(lm.Token)
 
 	c := pb.NewHelloClient(conn)
 	message, err := c.Say(context.Background(), &pb.Request{"Kelsey"})
@@ -57,7 +75,7 @@ func main() {
 	log.Println("Starting health check..")
 	hc := healthpb.NewHealthClient(conn)
 	status, err := hc.Check(context.Background(),
-		&healthpb.HealthCheckRequest{Service: "grpc.health.v1.hello"})
+		&healthpb.HealthCheckRequest{Service: "grpc.health.v1.helloservice"})
 	if err != nil {
 		log.Fatal(err)
 	}
