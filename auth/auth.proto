@@ -1,0 +1,30 @@
+// Copyright 2016 Google, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+syntax = "proto3";
+
+package auth;
+
+service Auth {
+  rpc Login (LoginRequest) returns (LoginResponse);
+}
+
+// The request message containing the username and password.
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+// The response message containing the JWT token.
+message LoginResponse {
+  string token = 1;
+}
+
+// The user message containing the user.
+message User {
+  string email = 1;
+  string username = 2;
+  string passwordHash = 3;
+  bool   isAdmin  = 4;
+}

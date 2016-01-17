@@ -28,7 +28,7 @@ func withConfigDir(path string) string {
 func main() {
 	var (
 		caCert     = flag.String("ca-cert", withConfigDir("ca.pem"), "Trusted CA certificate.")
-		serverAddr = flag.String("server-addr", "127.0.0.1:443", "Hello service address.")
+		serverAddr = flag.String("server-addr", "127.0.0.1:7900", "Hello service address.")
 		tlsCert    = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
 		tlsKey     = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
 	)
@@ -56,13 +56,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-
-	ac := pb.NewAuthClient(conn)
-	lm, err := ac.Login(context.Background(), &pb.LoginRequest{Username: "kelseyhightower", Password: "password"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(lm.Token)
 
 	c := pb.NewHelloClient(conn)
 	message, err := c.Say(context.Background(), &pb.Request{"Kelsey"})

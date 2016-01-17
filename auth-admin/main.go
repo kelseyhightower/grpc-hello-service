@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/ssh/terminal"
 
-	pb "github.com/kelseyhightower/grpc-hello-service/hello"
+	pb "github.com/kelseyhightower/grpc-hello-service/auth"
 )
 
 func main() {

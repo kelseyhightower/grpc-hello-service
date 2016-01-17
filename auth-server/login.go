@@ -1,7 +1,7 @@
 package main
 
 import (
-	pb "github.com/kelseyhightower/grpc-hello-service/hello"
+	pb "github.com/kelseyhightower/grpc-hello-service/auth"
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
@@ -12,9 +12,9 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type loginServer struct{}
+type authServer struct{}
 
-func (ls *loginServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
 	user, err := getUser(boltdb, request.Username)
 	if err != nil {
 		return nil, err

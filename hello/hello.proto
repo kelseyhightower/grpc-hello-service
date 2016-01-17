@@ -12,10 +12,6 @@ service Hello {
   rpc Say (Request) returns (Response);
 }
 
-service Auth {
-  rpc Login (LoginRequest) returns (LoginResponse);
-}
-
 // The request message containing the user's name.
 message Request {
   string name = 1; 
@@ -24,22 +20,4 @@ message Request {
 // The response message containing the greeting.
 message Response {
   string message = 1;	
-}
-
-// The login request message containing the username and password.
-message LoginRequest {
-  string username = 1;
-  string password = 2;
-}
-
-// The login response message containing the JWT token.
-message LoginResponse {
-  string token = 1;
-}
-
-message User {
-  string email = 1;
-  string username = 2;
-  string passwordHash = 3;
-  bool   isAdmin  = 4;
 }

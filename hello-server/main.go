@@ -19,7 +19,6 @@ import (
 	pb "github.com/kelseyhightower/grpc-hello-service/hello"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
 
-	"github.com/boltdb/bolt"
 	"golang.org/x/net/context"
 	"golang.org/x/net/trace"
 	"google.golang.org/grpc"
@@ -42,23 +41,15 @@ func withConfigDir(path string) string {
 	return filepath.Join(os.Getenv("HOME"), ".hello", "server", path)
 }
 
-var boltdb *bolt.DB
-
 func main() {
 	var (
 		caCert          = flag.String("ca-cert", withConfigDir("ca.pem"), "Trusted CA certificate.")
-		debugListenAddr = flag.String("debug-listen-addr", "127.0.0.1:8000", "HTTP listen address.")
-		listenAddr      = flag.String("listen-addr", "0.0.0.0:443", "HTTP listen address.")
+		debugListenAddr = flag.String("debug-listen-addr", "127.0.0.1:7901", "HTTP listen address.")
+		listenAddr      = flag.String("listen-addr", "0.0.0.0:7900", "HTTP listen address.")
 		tlsCert         = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
 		tlsKey          = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
 	)
 	flag.Parse()
-
-	var err error
-	boltdb, err = bolt.Open("hello.db", 0600, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	cert, err := tls.LoadX509KeyPair(*tlsCert, *tlsKey)
 	if err != nil {
@@ -82,7 +73,6 @@ func main() {
 
 	gs := grpc.NewServer(grpc.Creds(creds))
 	pb.RegisterHelloServer(gs, &helloServer{})
-	pb.RegisterAuthServer(gs, &loginServer{})
 
 	hs := health.NewHealthServer()
 	hs.SetServingStatus("grpc.health.v1.helloservice", 1)
