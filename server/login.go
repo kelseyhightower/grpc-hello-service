@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	pb "github.com/kelseyhightower/grpc-hello-service/hello"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,7 +15,6 @@ import (
 type loginServer struct{}
 
 func (ls *loginServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
-	log.Println(request.Username)
 	user, err := getUser(boltdb, request.Username)
 	if err != nil {
 		return nil, err

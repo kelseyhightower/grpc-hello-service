@@ -1,26 +1,42 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
 	"github.com/boltdb/bolt"
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/ssh/terminal"
 
 	pb "github.com/kelseyhightower/grpc-hello-service/hello"
 )
 
 func main() {
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte("password"), 12)
+	var (
+		email    = flag.String("e", "", "The user email address.")
+		username = flag.String("u", "", "The username.")
+		isAdmin  = flag.Bool("a", false, "Enable the admin flag.")
+	)
+	flag.Parse()
+
+	fmt.Println("enter password:")
+	password, err := terminal.ReadPassword(0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword(password, 12)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	user := pb.User{
-		Username:     "kelsey",
+		Email:        *email,
+		Username:     *username,
 		PasswordHash: string(passwordHash),
-		IsAdmin:      true,
+		IsAdmin:      *isAdmin,
 	}
 
 	data, err := proto.Marshal(&user)
@@ -47,7 +63,7 @@ func main() {
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("users"))
-		err := b.Put([]byte("kelseyhightower"), data)
+		err := b.Put([]byte(user.Username), data)
 		return err
 	})
 	if err != nil {

@@ -38,7 +38,8 @@ message LoginResponse {
 }
 
 message User {
-  string username = 1;
-  string passwordHash = 2;
-  bool   isAdmin  = 3;
+  string email = 1;
+  string username = 2;
+  string passwordHash = 3;
+  bool   isAdmin  = 4;
 }
