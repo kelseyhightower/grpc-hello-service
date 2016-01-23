@@ -1,0 +1,59 @@
+{
+	"ImportPath": "github.com/kelseyhightower/grpc-hello-service",
+	"GoVersion": "go1.6",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.1.0-65-gee4a088",
+			"Rev": "ee4a0888a9abe7eefe5a0992ca4cb06864839873"
+		},
+		{
+			"ImportPath": "github.com/dgrijalva/jwt-go",
+			"Comment": "v2.4.0-4-gafef698",
+			"Rev": "afef698c326bfd906b11659432544e5aae441d44"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "5fc2294e655b78ed8a02082d37808d46c17d7e64"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/bcrypt",
+			"Rev": "3760e016850398b85094c4c99e955b8c3dea5711"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/blowfish",
+			"Rev": "3760e016850398b85094c4c99e955b8c3dea5711"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "3760e016850398b85094c4c99e955b8c3dea5711"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "2e9cee70ee697e0a2ef894b560dda50dec7dff58"
+		},
+		{
+			"ImportPath": "golang.org/x/net/http2",
+			"Rev": "2e9cee70ee697e0a2ef894b560dda50dec7dff58"
+		},
+		{
+			"ImportPath": "golang.org/x/net/internal/timeseries",
+			"Rev": "2e9cee70ee697e0a2ef894b560dda50dec7dff58"
+		},
+		{
+			"ImportPath": "golang.org/x/net/trace",
+			"Rev": "2e9cee70ee697e0a2ef894b560dda50dec7dff58"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "20457ee8ea8546920d3f4e19e405da45250dc5a5"
+		},
+		{
+			"ImportPath": "google.golang.org/grpc",
+			"Rev": "5da22b92e9485c15a6b284d52cc54d6580864c99"
+		}
+	]
+}
