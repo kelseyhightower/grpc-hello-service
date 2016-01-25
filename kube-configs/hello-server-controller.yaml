@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: hello-server
+spec:
+  replicas: 1
+  selector:
+    name: hello-server
+  template:
+    metadata:
+      labels:
+        name: hello-server
+    spec:
+      containers:
+      - name: hello-server
+        image: kelseyhightower/hello-server:1.0.0
+        command:
+          - "/hello-server"
+        args:
+          - "-tls-key=/tls/key.pem"
+          - "-tls-cert=/tls/cert.pem"
+          - "-ca-cert=/tls/ca.pem"
+        ports:
+          - containerPort: 7900
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: 100M
+        volumeMounts:
+          - name: "hello-server-tls"
+            readOnly: true
+            mountPath: "/tls"
+      volumes:
+        - name: "hello-server-tls"
+          secret:
+            secretName: "hello-server-tls"

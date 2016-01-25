@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: auth-server
+spec:
+  replicas: 1
+  selector:
+    name: auth-server
+  template:
+    metadata:
+      labels:
+        name: auth-server
+    spec:
+      containers:
+      - name: auth-admin
+        image: kelseyhightower/auth-admin:1.0.0
+      - name: auth-server
+        image: kelseyhightower/auth-server:1.0.0
+        command:
+          - "/auth-server"
+        args:
+          - "-listen-addr=0.0.0.0:7800"
+          - "-debug-listen-addr=0.0.0.0:7801"
+          - "-tls-key=/tls/key.pem"
+          - "-tls-cert=/tls/cert.pem"
+          - "-ca-cert=/tls/ca.pem"
+        ports:
+          - name: grpc
+            containerPort: 7800
+          - name: debug
+            containerPort: 7801
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: 100M
+        volumeMounts:
+          - name: "auth-server-tls"
+            readOnly: true
+            mountPath: "/tls"
+          - name: "auth-data"
+            mountPath: "/var/lib/data"
+      volumes:
+        - name: "hello-server-tls"
+          secret:
+            secretName: "hello-server-tls"
+        - name: "auth-data"
+          gcePersistentDisk:
+            pdName: auth-data
+            fsType: ext4
