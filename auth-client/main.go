@@ -59,7 +59,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = ioutil.WriteFile(withConfigDir(".token"), []byte(lm.Token), 0400)
+	err = ioutil.WriteFile(withConfigDir(".token"), []byte(lm.Token), 0600)
 	if err != nil {
 		log.Fatal(err)
 	}

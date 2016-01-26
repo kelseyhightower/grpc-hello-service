@@ -7,7 +7,11 @@ metadata:
 spec:
   clusterIP: 10.163.240.101
   ports:
-    - port: 
-      targetPort: 3306
+    - name: grpc
+      port: 7900
+      targetPort: 7900
+    - name: debug
+      port: 7901
+      targetPort: 7901
   selector:
-    app: mysql
+    app: hello-server
