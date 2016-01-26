@@ -92,11 +92,11 @@ auth-client -username kelseyhightower
 ## Say Hello
 
 ```
-kubectl port-forward hello-server-xxxxx 7901:7901 7900:7900
+hello-client
 ```
 
 ```
-hello-client
+kubectl port-forward hello-server-xxxxx 7901:7901 7900:7900
 ```
 
 ## Create Services

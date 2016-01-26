@@ -35,7 +35,6 @@ spec:
           - name: "hello-server-tls"
             readOnly: true
             mountPath: "/tls"
-        imagePullPolicy: Always
       volumes:
         - name: "hello-server-tls"
           secret:

@@ -36,7 +36,6 @@ spec:
             mountPath: "/tls"
           - name: "auth-data"
             mountPath: "/var/lib"
-        imagePullPolicy: Always
       volumes:
         - name: "auth-server-tls"
           secret:
