@@ -1,88 +1,191 @@
-# hello service demo
+# Hello Service Deployment Tutorial
 
-## Cleanup
+## This is currently a work in progress and incomplete. ETA 1/28/2016
 
-```
-kubectl delete rc hello-server auth-server
-kubectl delete svc auth-server hello-server
-kubectl delete secrets auth-server-tls hello-server-tls
-```
-```
-gcloud compute disks delete auth-data
-```
+The following tutorial walks you through deploying the hello service gRPC collection of micro-services.
 
-## Create the Auth Data Volume
+## Prerequisites
 
-```
-gcloud compute disks create auth-data
-```
+* A working Kubernetes cluster running 1.1.x or greater
+* A active Google Cloud Platform account
 
-## Create Secrets
+### Creating a Kubernetes Cluster
+
+The easiest way to get a Kubernetes cluster is to use GKE:
 
 ```
-kubectl get secrets
+$ gcloud container clusters create hello-tutorial
 ```
 
-### Auth Server
+At this point you should have a 3 node kubernetes cluster. Run the following command
+to configure the kubectl command line tool to use it:
 
 ```
-conf2kube -n auth-server-tls -f auth-server-key.pem -k key.pem | kubectl create -f -
-```
-```
-kubectl patch secret auth-server-tls -p `conf2kube -n auth-server-tls -f auth-server.pem -k cert.pem`
-kubectl patch secret auth-server-tls -p `conf2kube -n auth-server-tls -f ca.pem -k ca.pem`
-```
-```
-kubectl describe secrets auth-server-tls
+$ gcloud container clusters get-credentials hello-tutorial
 ```
 
-### Hello Server
+Verify the cluster is healthy:
 
 ```
-conf2kube -n hello-server-tls -f hello-server-key.pem -k key.pem | kubectl create -f -
+$ kubectl get cs
 ```
 
-```
-kubectl patch secret hello-server-tls -p `conf2kube -n hello-server-tls -f hello-server.pem -k cert.pem`
-kubectl patch secret hello-server-tls -p `conf2kube -n hello-server-tls -f ca.pem -k ca.pem`
-kubectl patch secret hello-server-tls -p `conf2kube -n hello-server-tls -f auth-server.pem -k jwt.pem`
-```
-```
-kubectl describe secrets hello-server-tls
-```
+## Deploying the Auth Service
 
-## Create Replication Controllers
+The auth service is responsible for authenticating users and issuing JWT tokens that can be used to access other gRPC services.
+This section will walk you through deploying the auth service using Kubernetes and GCE.
 
-### Auth Server
+### Create the Auth Data Volume
+
+The auth service requires a presistent disk to store the user database backed by [boltDB](https://github.com/boltdb/bolt).
+Create the GCE disk using the gcloud command line tool:
 
 ```
-kubectl create -f auth-controller.yaml
+$ gcloud compute disks create auth-data
 ```
 
-```
-kubectl get pods --watch
-kubectl logs auth-server-xxxx
-```
+### Create the Auth Service Secrets
+
+The auth service requires a set of TLS certificates to serve secure connections between gRPC clients.
+
+Create a Kubernetes secret using the conf2kube commandline tool:
 
 ```
-kubectl exec -i -t -p auth-server-xxxxx -c auth-server /bin/ash
+$ conf2kube -n auth-server-tls -f auth-server-key.pem -k key.pem | \
+  kubectl create -f -
 ```
+
+Next, append the TLS server certificate and CA certificate to the `auth-server-tls` secret:
+
+```
+$ kubectl patch secret auth-server-tls \
+  -p `conf2kube -n auth-server-tls -f auth-server.pem -k cert.pem`
+```
+
+$ kubectl patch secret auth-server-tls \
+  -p `conf2kube -n auth-server-tls -f ca.pem -k ca.pem`
+```
+
+The auth service also needs a RSA private key for signing JWT tokens. In this example we will
+reuse the server TLS key for signing tokens.
+
+Append the TLS server certificate to the `auth-server-tls` secret using "jwt-key.pem" as
+key name:
+
+```
+$ kubectl patch secret auth-server-tls \
+  -p `conf2kube -n auth-server-tls -f auth-server-key.pem -k jwt-key.pem`
+```
+
+Run the `kubectl describe` command to display the details of the `auth-server-tls` secret:
+
+```
+$ kubectl describe secrets auth-server-tls
+```
+
+### Create the Auth Service Replication Controllers
+
+Replication controllers are used to define the auth service in Kubernetes
+and ensure it's running at all times.
+
+Create the auth service replication controller using kubectl:
+
+```
+$ kubectl create -f auth-controller.yaml
+```
+
+Run the `kubectl get pods` command to monitor the auth service pod:
+
+```
+$ kubectl get pods --watch
+```
+
+Once the auth server pod is up and running view the logs using the `kubectl logs` command:
+
+```
+$ kubectl logs auth-server-xxxx
+```
+
+Notice the auth service is waiting on the auth.db user database file. This file
+does not currently exist so we have to create it.
+
+Create the `auth.db` user database. First jump into the container using the
+`kubectl exec` command:
+
+```
+$ kubectl exec -i -t -p auth-server-xxxxx -c auth-server /bin/ash
+```
+
+Next, create a new user using the `auth-admin` command:
 
 ```
 /auth-admin -a -e kelsey.hightower@gmail.com -u kelseyhightower
+```
+
+Remember the password you type at the prompt. You'll need it later in the
+tutorial.
+
+Exit the container:
+
+```
 exit
 ```
 
-### Hello Server
+At this point the `auth.db` user database is in place. Run the `kubectl logs`
+command again to verify the auth service as started successfully:
+
 
 ```
-kubectl create -f hello-controller.yaml
+$ kubectl logs auth-server-xxxx
+```
+
+##  Deploying the Hello Server
+
+The hello service is responsible for returning a hello message to gRPC clients
+after validating the JWT token supplied by the client.
+
+Deployment Requirements:
+
+* TLS server certs
+* RSA public key for validating JWT tokens
+* The `kelseyhightower/hello-server:1.0.0` docker image
+
+### Create Hello Server Secrets
+
+```
+$ conf2kube -n hello-server-tls -f hello-server-key.pem -k key.pem | \
+  kubectl create -f -
+```
+
+```
+$ kubectl patch secret hello-server-tls \
+  -p `conf2kube -n hello-server-tls -f hello-server.pem -k cert.pem`
+```
+
+```
+$ kubectl patch secret hello-server-tls \
+  -p `conf2kube -n hello-server-tls -f ca.pem -k ca.pem`
+```
+
+```
+$ kubectl patch secret hello-server-tls \
+  -p `conf2kube -n hello-server-tls -f auth-server.pem -k jwt.pem`
+```
+
+```
+$ kubectl describe secrets hello-server-tls
+```
+
+### Create Hello Server Replication Controller
+
+```
+$ kubectl create -f hello-controller.yaml
 ```
 
 ## Get auth token
 
 ```
-kubectl port-forward auth-server-xxxxx 7801:7801 7800:7800
+$ kubectl port-forward auth-server-xxxxx 7801:7801 7800:7800
 ```
 
 ```
@@ -102,7 +205,39 @@ kubectl port-forward hello-server-xxxxx 7901:7901 7900:7900
 ## Create Services
 
 ```
-kubectl create -f hello-service.yaml
-kubectl create -f auth-service.yaml
+$ kubectl create -f hello-service.yaml
 ```
 
+```
+$ kubectl create -f auth-service.yaml
+```
+
+
+## Cleanup
+
+Once you have complete the tutorial run the following commands to clean up the
+hello service Kubernetes objects:
+
+Delete the replication controllers:
+
+```
+$ kubectl delete rc hello-server auth-server
+```
+
+Delete the services:
+
+```
+$ kubectl delete svc auth-server hello-server
+```
+
+Delete the secrets:
+
+```
+$ kubectl delete secrets auth-server-tls hello-server-tls
+```
+
+Delete the auth service data volume:
+
+```
+$ gcloud compute disks delete auth-data
+```
