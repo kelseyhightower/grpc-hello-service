@@ -53,6 +53,8 @@ kubectl describe secrets hello-server-tls
 
 ## Create Replication Controllers
 
+### Auth Server
+
 ```
 kubectl create -f auth-controller.yaml
 ```
@@ -71,6 +73,12 @@ kubectl exec -i -t -p auth-server-xxxxx -c auth-server /bin/ash
 exit
 ```
 
+### Hello Server
+
+```
+kubectl create -f hello-controller.yaml
+```
+
 ## Get auth token
 
 ```
@@ -81,14 +89,7 @@ auth-client
 kubectl port-forward auth-server-xxxxx 7801:7801 7800:7800
 ```
 
-
-## Deploy Hello server
-
-```
-kubectl create -f hello-controller.yaml
-```
-
-### Say Hello
+## Say Hello
 
 ```
 kubectl port-forward hello-server-xxxxx 7901:7901 7900:7900
