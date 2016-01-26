@@ -19,9 +19,10 @@ spec:
         args:
           - "-listen-addr=0.0.0.0:7900"
           - "-debug-listen-addr=0.0.0.0:7901"
+          - "-ca-cert=/tls/ca.pem"
           - "-tls-key=/tls/key.pem"
           - "-tls-cert=/tls/cert.pem"
-          - "-ca-cert=/tls/ca.pem"
+          - "-jwt-public-key=/tls/jwt.pem"
         ports:
           - name: grpc
             containerPort: 7900

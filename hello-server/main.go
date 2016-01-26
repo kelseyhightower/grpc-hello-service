@@ -5,6 +5,7 @@
 package main
 
 import (
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"flag"
@@ -29,25 +30,13 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func validateToken(token string) (*jwt.Token, error) {
+func validateToken(token string, publicKey *rsa.PublicKey) (*jwt.Token, error) {
 	jwtToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			log.Printf("Unexpected signing method: %v", t.Header["alg"])
 			return nil, fmt.Errorf("invalid token")
 		}
-
-		data, err := ioutil.ReadFile("/tls/jwt.pem")
-		if err != nil {
-			log.Println("Error validating token: %v", err)
-			return nil, fmt.Errorf("invalid token")
-		}
-
-		publickey, err := jwt.ParseRSAPublicKeyFromPEM(data)
-		if err != nil {
-			log.Println("Error validating token: %v", err)
-			return nil, fmt.Errorf("invalid token")
-		}
-		return publickey, nil
+		return publicKey, nil
 	})
 	if err == nil && jwtToken.Valid {
 		return jwtToken, nil
@@ -56,7 +45,23 @@ func validateToken(token string) (*jwt.Token, error) {
 }
 
 // helloServer is used to implement hello.HelloServer.
-type helloServer struct{}
+type helloServer struct {
+	jwtPublicKey *rsa.PublicKey
+}
+
+func NewHelloServer(rsaPublicKey string) (*helloServer, error) {
+	data, err := ioutil.ReadFile(rsaPublicKey)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading the jwt public key: %v", err)
+	}
+
+	publickey, err := jwt.ParseRSAPublicKeyFromPEM(data)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing the jwt public key: %s", err)
+	}
+
+	return &helloServer{publickey}, nil
+}
 
 func (hs *helloServer) Say(ctx context.Context, request *pb.Request) (*pb.Response, error) {
 	var (
@@ -74,7 +79,7 @@ func (hs *helloServer) Say(ctx context.Context, request *pb.Request) (*pb.Respon
 		return nil, grpc.Errorf(codes.Unauthenticated, "valid token required.")
 	}
 
-	token, err = validateToken(jwtToken[0])
+	token, err = validateToken(jwtToken[0], hs.jwtPublicKey)
 	if err != nil {
 		return nil, grpc.Errorf(codes.Unauthenticated, "valid token required.")
 	}
@@ -97,19 +102,18 @@ func main() {
 		listenAddr      = flag.String("listen-addr", "0.0.0.0:7900", "HTTP listen address.")
 		tlsCert         = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
 		tlsKey          = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
+		jwtPublicKey    = flag.String("jwt-public-key", withConfigDir("jwt.pem"), "The RSA public key to use for validating JWTs")
 	)
 	flag.Parse()
 
 	cert, err := tls.LoadX509KeyPair(*tlsCert, *tlsKey)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	rawCaCert, err := ioutil.ReadFile(*caCert)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(rawCaCert)
@@ -121,11 +125,17 @@ func main() {
 	})
 
 	gs := grpc.NewServer(grpc.Creds(creds))
-	pb.RegisterHelloServer(gs, &helloServer{})
 
-	hs := health.NewHealthServer()
-	hs.SetServingStatus("grpc.health.v1.helloservice", 1)
-	healthpb.RegisterHealthServer(gs, hs)
+	hs, err := NewHelloServer(*jwtPublicKey)
+    if err != nil {
+        log.Fatal(err)
+    }
+	
+	pb.RegisterHelloServer(gs, hs)
+
+	healthServer := health.NewHealthServer()
+	healthServer.SetServingStatus("grpc.health.v1.helloservice", 1)
+	healthpb.RegisterHealthServer(gs, healthServer)
 
 	ln, err := net.Listen("tcp", *listenAddr)
 	if err != nil {
