@@ -23,7 +23,7 @@ import (
 type authServer struct{}
 
 func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
-	key, err := ioutil.ReadFile(withConfigDir("key.pem"))
+	key, err := ioutil.ReadFile("/tls/key.pem")
 	if err != nil {
 		return nil, grpc.Errorf(codes.Internal, err.Error())
 	}
