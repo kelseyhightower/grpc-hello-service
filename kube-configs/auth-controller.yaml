@@ -40,9 +40,9 @@ spec:
           - name: "auth-data"
             mountPath: "/var/lib/data"
       volumes:
-        - name: "hello-server-tls"
+        - name: "auth-server-tls"
           secret:
-            secretName: "hello-server-tls"
+            secretName: "auth-server-tls"
         - name: "auth-data"
           gcePersistentDisk:
             pdName: auth-data

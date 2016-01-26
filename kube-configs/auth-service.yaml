@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: auth-server
+  name: auth-server
+spec:
+  clusterIP: 10.163.240.100
+  ports:
+    - name: grpc
+      port: 7800
+      targetPort: 7800
+    - name: debug
+      port: 7801
+      targetPort: 7801
+  selector:
+    app: auth-server
