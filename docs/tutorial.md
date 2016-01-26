@@ -62,6 +62,7 @@ $ kubectl patch secret auth-server-tls \
   -p `conf2kube -n auth-server-tls -f auth-server.pem -k cert.pem`
 ```
 
+```
 $ kubectl patch secret auth-server-tls \
   -p `conf2kube -n auth-server-tls -f ca.pem -k ca.pem`
 ```
