@@ -1,7 +1,7 @@
 #!/bin/bash
 mkdir -p bin
-GOOS=linux go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/auth-admin ./auth-admin
-GOOS=linux go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/auth-client ./auth-client
-GOOS=linux go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/auth-server ./auth-server
-GOOS=linux go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/hello-client ./hello-client
-GOOS=linux go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/hello-server ./hello-server
+go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/auth-admin ./auth-admin
+go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/auth-client ./auth-client
+go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/auth-server ./auth-server
+go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/hello-client ./hello-client
+go build -a --ldflags '-extldflags "-static"' -tags netgo -installsuffix netgo -o bin/hello-server ./hello-server
