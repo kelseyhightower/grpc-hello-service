@@ -48,7 +48,7 @@ func main() {
 		log.Fatal("marshaling error: ", err)
 	}
 
-	db, err := bolt.Open("auth.db", 0600, nil)
+	db, err := bolt.Open("/var/lib/auth.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

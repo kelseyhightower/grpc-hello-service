@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	pb "github.com/kelseyhightower/grpc-hello-service/auth"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
@@ -38,7 +39,17 @@ func main() {
 	flag.Parse()
 
 	var err error
-	boltdb, err = bolt.Open("auth.db", 0600, nil)
+	log.Println("Auth service starting...")
+	for {
+		_, err := os.Open("/var/lib/auth.db")
+		if !os.IsNotExist(err) {
+			break
+		}
+		log.Println("missing auth database, retrying in 5 secs.")
+		time.Sleep(5 * time.Second)
+	}
+
+	boltdb, err = bolt.Open("/var/lib/auth.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,5 +73,6 @@ func main() {
 	go gs.Serve(ln)
 
 	trace.AuthRequest = func(req *http.Request) (any, sensitive bool) { return true, true }
+	log.Println("Auth service started successfully.")
 	log.Fatal(http.ListenAndServe(*debugListenAddr, nil))
 }
