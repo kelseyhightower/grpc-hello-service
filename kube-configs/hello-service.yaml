@@ -14,4 +14,4 @@ spec:
       port: 7901
       targetPort: 7901
   selector:
-    app: hello-server
+    name: hello-server
