@@ -3,18 +3,18 @@
 ## Cleanup
 
 ```
-$ kubectl delete rc hello-server auth-server
-$ kubectl delete svc auth-server hello-server
-$ kubectl delete secrets auth-server-tls hello-server-tls
+kubectl delete rc hello-server auth-server
+kubectl delete svc auth-server hello-server
+kubectl delete secrets auth-server-tls hello-server-tls
 ```
 ```
-$ gcloud compute disks delete auth-data
+gcloud compute disks delete auth-data
 ```
 
 ## Create the Auth Data Volume
 
 ```
-$ gcloud compute disks create auth-data
+gcloud compute disks create auth-data
 ```
 
 ## Create Secrets
@@ -82,11 +82,11 @@ kubectl create -f hello-controller.yaml
 ## Get auth token
 
 ```
-auth-client
+kubectl port-forward auth-server-xxxxx 7801:7801 7800:7800
 ```
 
 ```
-kubectl port-forward auth-server-xxxxx 7801:7801 7800:7800
+auth-client -username kelseyhightower
 ```
 
 ## Say Hello
