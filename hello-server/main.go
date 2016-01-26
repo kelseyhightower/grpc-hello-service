@@ -36,7 +36,7 @@ func validateToken(token string) (*jwt.Token, error) {
 			return nil, fmt.Errorf("invalid token")
 		}
 
-		data, err := ioutil.ReadFile(withConfigDir("cert.pem"))
+		data, err := ioutil.ReadFile("/tls/jwt.pem")
 		if err != nil {
 			log.Println("Error validating token: %v", err)
 			return nil, fmt.Errorf("invalid token")

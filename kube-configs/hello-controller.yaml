@@ -17,19 +17,25 @@ spec:
         command:
           - "/hello-server"
         args:
+          - "-listen-addr=0.0.0.0:7900"
+          - "-debug-listen-addr=0.0.0.0:7901"
           - "-tls-key=/tls/key.pem"
           - "-tls-cert=/tls/cert.pem"
           - "-ca-cert=/tls/ca.pem"
         ports:
-          - containerPort: 7900
+          - name: grpc
+            containerPort: 7900
+          - name: debug
+            containerPort: 7901
         resources:
           limits:
-            cpu: "0.2"
-            memory: 100M
+            cpu: 0.2
+            memory: "100Mi"
         volumeMounts:
           - name: "hello-server-tls"
             readOnly: true
             mountPath: "/tls"
+        imagePullPolicy: Always
       volumes:
         - name: "hello-server-tls"
           secret:
