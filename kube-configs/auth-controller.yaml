@@ -17,8 +17,9 @@ spec:
         command:
           - "/auth-server"
         args:
-          - "-listen-addr=0.0.0.0:7800"
           - "-debug-listen-addr=0.0.0.0:7801"
+          - "-listen-addr=0.0.0.0:7800"
+          - "-jwt-private-key=/tls/jwt-key.pem"
           - "-tls-key=/tls/key.pem"
           - "-tls-cert=/tls/cert.pem"
         ports:

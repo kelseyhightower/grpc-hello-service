@@ -5,6 +5,8 @@
 package main
 
 import (
+	"crypto/rsa"
+	"fmt"
 	"io/ioutil"
 	"time"
 
@@ -20,18 +22,23 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type authServer struct{}
+type authServer struct {
+	jwtPrivatekey *rsa.PrivateKey
+}
 
-func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
-	key, err := ioutil.ReadFile("/tls/key.pem")
+func NewAuthServer(rsaPrivateKey string) (*authServer, error) {
+	key, err := ioutil.ReadFile(rsaPrivateKey)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, err.Error())
+		return nil, fmt.Errorf("Error reading the jwt private key: %s", err)
 	}
 	parsedKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
 	if err != nil {
-		return nil, grpc.Errorf(codes.Internal, err.Error())
+		return nil, fmt.Errorf("Error parsing the jwt private key: %s", err)
 	}
+	return &authServer{parsedKey}, nil
+}
 
+func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
 	user, err := getUser(boltdb, request.Username)
 	if err != nil {
 		return nil, err
@@ -49,7 +56,7 @@ func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.
 	token.Claims["email"] = user.Email
 	token.Claims["sub"] = user.Username
 
-	tokenString, err := token.SignedString(parsedKey)
+	tokenString, err := token.SignedString(as.jwtPrivatekey)
 	if err != nil {
 		return nil, grpc.Errorf(codes.Internal, err.Error())
 	}

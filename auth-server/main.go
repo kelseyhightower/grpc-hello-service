@@ -35,6 +35,7 @@ func main() {
 		listenAddr      = flag.String("listen-addr", "127.0.0.1:7800", "HTTP listen address.")
 		tlsCert         = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
 		tlsKey          = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
+		jwtPrivateKey   = flag.String("jwt-private-key", withConfigDir("jwt-key.pem"), "The RSA private key to use for signing JWTs")
 	)
 	flag.Parse()
 
@@ -60,7 +61,12 @@ func main() {
 	}
 
 	gs := grpc.NewServer(grpc.Creds(ta))
-	pb.RegisterAuthServer(gs, &authServer{})
+
+	as, err := NewAuthServer(*jwtPrivateKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	pb.RegisterAuthServer(gs, as)
 
 	hs := health.NewHealthServer()
 	hs.SetServingStatus("grpc.health.v1.authservice", 1)
