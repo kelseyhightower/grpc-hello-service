@@ -112,10 +112,10 @@ $ kubectl describe secrets auth-tls
 ```
 
 ```
-Name:		auth-tls
-Namespace:	default
-Labels:		<none>
-Annotations:	<none>
+Name:        auth-tls
+Namespace:   default
+Labels:      <none>
+Annotations: <none>
 
 Type:	Opaque
 
@@ -140,6 +140,19 @@ $ conf2kube -n jwt-private-key -f jwt-key.pem -k key.pem | \
 ```
 $ conf2kube -n jwt-public-key -f jwt.pem -k jwt.pem | \
   kubectl create -f -
+```
+
+#### Auth Secrets Verification
+
+```
+$ kubectl get secrets
+```
+```
+NAME                  TYPE                                  DATA      AGE
+auth-tls              Opaque                                3         4m
+default-token-pg0g8   kubernetes.io/service-account-token   2         3h
+jwt-private-key       Opaque                                1         13s
+jwt-public-key        Opaque                                1         7s
 ```
 
 ### Create the Auth Service Replication Controllers
