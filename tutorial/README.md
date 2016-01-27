@@ -178,6 +178,13 @@ Once the auth server pod is up and running view the logs using the `kubectl logs
 $ kubectl logs auth-xxxx
 ```
 
+```
+2016/01/27 02:18:45 Auth service starting...
+2016/01/27 02:18:45 missing auth database, retrying in 5 secs.
+2016/01/27 02:18:50 missing auth database, retrying in 5 secs.
+2016/01/27 02:18:55 missing auth database, retrying in 5 secs.
+```
+
 Notice the auth service is waiting on the auth.db user database file. This file
 does not currently exist so we have to create it.
 
@@ -206,9 +213,15 @@ exit
 At this point the `auth.db` user database is in place. Run the `kubectl logs`
 command again to verify the auth service as started successfully:
 
-
 ```
 $ kubectl logs auth-xxxx
+```
+
+```
+2016/01/27 02:24:30 missing auth database, retrying in 5 secs.
+2016/01/27 02:24:35 missing auth database, retrying in 5 secs.
+2016/01/27 02:24:40 missing auth database, retrying in 5 secs.
+2016/01/27 02:24:45 Auth service started successfully.
 ```
 
 ##  Deploying the Hello Server
