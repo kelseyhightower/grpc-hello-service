@@ -94,6 +94,12 @@ $ kubectl patch secret auth-tls \
   -p `conf2kube -n auth-tls -f ca.pem -k ca.pem`
 ```
 
+Run the `kubectl describe` command to display the details of the `auth-server-tls` secret:
+
+```
+$ kubectl describe secrets auth-server-tls
+```
+
 #### Create the JWT secrets
 
 The auth service uses a RSA private key for signing JWT tokens.
@@ -108,12 +114,6 @@ $ conf2kube -n jwt-private-key -f jwt-key.pem -k key.pem | \
 ```
 $ conf2kube -n jwt-public-key -f jwt.pem -k jwt.pem | \
   kubectl create -f -
-```
-
-Run the `kubectl describe` command to display the details of the `auth-server-tls` secret:
-
-```
-$ kubectl describe secrets auth-server-tls
 ```
 
 ### Create the Auth Service Replication Controllers
