@@ -43,6 +43,9 @@ The microservices in this tutorial are secured by TLS which requires TLS certifi
 In addition to securing our gRPC services a TLS key pair will be used to sign and
 validate JWT tokens.
 
+Fist install the `cfssl` and `cfssljson` command line tools following the
+[cfssl installation guide](https://github.com/cloudflare/cfssl#installation).
+
 Generate the required TLS certs by running the `generate-certs` script from this directory:
 
 ```
