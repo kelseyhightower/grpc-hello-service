@@ -93,7 +93,7 @@ $ conf2kube -n auth-tls -f auth-key.pem -k key.pem | \
   kubectl create -f -
 ```
 
-Next, append the auth service TLS certificate and CA certificate to the `auth-tls` secret:
+Append the Auth service TLS certificate and CA certificate to the `auth-tls` secret:
 
 ```
 $ kubectl patch secret auth-tls \
@@ -112,13 +112,7 @@ $ kubectl describe secrets auth-tls
 ```
 
 ```
-Name:        auth-tls
-Namespace:   default
-Labels:      <none>
-Annotations: <none>
-
-Type:	Opaque
-
+...
 Data
 ====
 key.pem:	1679 bytes
@@ -262,6 +256,15 @@ Run the `kubectl describe` command to display the details of the `hello-tls` sec
 
 ```
 $ kubectl describe secrets hello-tls
+```
+
+```
+...
+Data
+====
+ca.pem:		1342 bytes
+cert.pem:	1444 bytes
+key.pem:	1679 bytes
 ```
 
 ### Create Hello Server Replication Controller
