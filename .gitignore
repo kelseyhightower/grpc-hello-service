@@ -1,3 +1,4 @@
 bin/
-certs/*.pem
+*.pem
+*.csr
 auth.db
