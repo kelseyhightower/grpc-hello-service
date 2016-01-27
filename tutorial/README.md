@@ -108,7 +108,22 @@ $ kubectl patch secret auth-tls \
 Run the `kubectl describe` command to display the details of the `auth-server-tls` secret:
 
 ```
-$ kubectl describe secrets auth-server-tls
+$ kubectl describe secrets auth-tls
+```
+
+```
+Name:		auth-tls
+Namespace:	default
+Labels:		<none>
+Annotations:	<none>
+
+Type:	Opaque
+
+Data
+====
+key.pem:	1679 bytes
+ca.pem:		1342 bytes
+cert.pem:	1440 bytes
 ```
 
 #### Create the JWT secrets
