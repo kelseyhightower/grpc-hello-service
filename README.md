@@ -4,8 +4,8 @@ The repo holds an example gRPC set of applications used to help people learn gRP
 
 ## Tutorials
 
-* [Kubernetes Deployment](tutorials/kubernetes)
-* [Build Docker Images](tutorials/docker)
+* [Deploying with Kubernetes](tutorials/kubernetes)
+* [Building Docker Images](tutorials/docker)
 
 ## Build
 

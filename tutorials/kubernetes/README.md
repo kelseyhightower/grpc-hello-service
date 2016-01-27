@@ -1,4 +1,4 @@
-# Kubernetes Deployment Tutorial
+# Deploying gRPC Applications with Kubernetes
 
 The following tutorial walks you through deploying the hello service gRPC collection of micro-services.
 
