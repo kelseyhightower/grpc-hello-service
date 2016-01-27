@@ -50,6 +50,21 @@ Generate the required TLS certs by running the `generate-certs` script from this
 $ ./generate-certs
 ```
 
+You should now have the following keys and certs:
+
+```
+auth-key.pem
+auth.pem
+ca-key.pem
+ca.pem
+client-key.pem
+client.pem
+hello-key.pem
+hello.pem
+jwt-key.pem
+jwt.pem
+```
+
 ## Deploying the Auth Service
 
 The auth service is responsible for authenticating users and issuing JWT tokens that can be used to access other gRPC services.
