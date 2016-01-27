@@ -327,7 +327,7 @@ Append the following lines to your local `/etc/hosts` file:
 104.197.xxx.xxx hello.example.com
 ```
 
->> Be sure to subsitute '130.211.xxx.xxx' with the acutal external IP from your output.
+> Be sure to subsitute '130.211.xxx.xxx' with the acutal external IP from your output.
 
 ## Get auth token
 
