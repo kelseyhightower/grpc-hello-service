@@ -30,6 +30,14 @@ Verify the cluster is healthy:
 $ kubectl get cs
 ```
 
+```
+NAME                 STATUS    MESSAGE              ERROR
+etcd-1               Healthy   {"health": "true"}   nil
+controller-manager   Healthy   ok                   nil
+scheduler            Healthy   ok                   nil
+etcd-0               Healthy   {"health": "true"}   nil
+```
+
 ## Deploying the Auth Service
 
 The auth service is responsible for authenticating users and issuing JWT tokens that can be used to access other gRPC services.
