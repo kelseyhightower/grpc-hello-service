@@ -15,7 +15,6 @@ import (
 
 	"github.com/kelseyhightower/grpc-hello-service/credentials/jwt"
 	pb "github.com/kelseyhightower/grpc-hello-service/hello"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -73,13 +72,4 @@ func main() {
 	}
 
 	log.Println(message.Message)
-
-	log.Println("Starting health check..")
-	hc := healthpb.NewHealthClient(conn)
-	status, err := hc.Check(context.Background(),
-		&healthpb.HealthCheckRequest{Service: "grpc.health.v1.helloservice"})
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("status:", status)
 }
