@@ -4,7 +4,8 @@ The following tutorial walks you through deploying the hello service gRPC collec
 
 ## Prerequisites
 
-* [Google Cloud Platform Account](https://cloud.google.com) and [Google Cloud SDK](https://cloud.google.com/sdk)
+* [Google Cloud Platform Account](https://cloud.google.com)
+* [Google Cloud SDK](https://cloud.google.com/sdk)
 * [Go 1.6](https://golang.org/dl)
 
 ### Creating a Kubernetes Cluster
