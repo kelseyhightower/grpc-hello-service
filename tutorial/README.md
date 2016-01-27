@@ -235,12 +235,18 @@ Deployment Requirements:
 * RSA public key for validating JWT tokens
 * The `kelseyhightower/hello-server:1.0.0` docker image
 
-### Create Hello Server Secrets
+### Create Hello Service Secrets
+
+Create the `hello-tls` Kubernetes secret and store the Hello service TLS
+private key as key.pem using conf2kube:
 
 ```
 $ conf2kube -n hello-tls -f hello-key.pem -k key.pem | \
   kubectl create -f -
 ```
+
+Append the Hello service TLS certificate and CA certificate to the
+`hello-tls` secret:
 
 ```
 $ kubectl patch secret hello-tls \
@@ -251,6 +257,8 @@ $ kubectl patch secret hello-tls \
 $ kubectl patch secret hello-tls \
   -p `conf2kube -n hello-tls -f ca.pem -k ca.pem`
 ```
+
+Run the `kubectl describe` command to display the details of the `hello-tls` secret:
 
 ```
 $ kubectl describe secrets hello-tls
