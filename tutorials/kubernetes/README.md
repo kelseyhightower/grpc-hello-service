@@ -1,4 +1,4 @@
-# Hello Service Deployment Tutorial
+# Kubernetes Deployment Tutorial
 
 The following tutorial walks you through deploying the hello service gRPC collection of micro-services.
 
