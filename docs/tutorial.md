@@ -44,12 +44,8 @@ The microservices in this tutorial are secured by TLS which requires TLS certifi
 In addition to securing our gRPC services a TLS key pair will be used to sign and
 validate JWT tokens.
 
-Generate the required TLS certs by running the `generate-certs` script from the certs
-directory at the root of this project:
+Generate the required TLS certs by running the `generate-certs` script from this directory:
 
-```
-$ cd grpc-hello-service/certs
-```
 ```
 $ ./generate-certs
 ```
