@@ -1,7 +1,8 @@
 {
-  "CN": "auth.kuar.io",
+  "CN": "auth.example.com",
   "hosts": [
     "127.0.0.1",
+    "auth.example.com",
     "auth.default.svc.cluster.local"
   ],
   "key": {

@@ -275,20 +275,66 @@ $ kubectl create -f hello-controller.yaml
 
 ## Expose the Auth and Hello Services
 
-```
-$ kubectl create -f hello-service.yaml
-```
+With both the Auth and Hello services deployed we need to expose them
+so external gRPC clients can communicate with them. In this tutorial
+will will expose both services using a [GCE network loadbalancer](https://cloud.google.com/compute/docs/load-balancing/network).
+
+Expose the auth service:
 
 ```
 $ kubectl create -f auth-service.yaml
 ```
+
+Expose the hello service:
+
+```
+$ kubectl create -f hello-service.yaml
+```
+
+### Edit local DNS
+
+The TLS certificates we created ealier in the tutorial where generated to work
+with the following domains:
+
+```
+auth.example.com
+auth.default.svc.cluster.local
+hello.example.com
+hello.default.svc.cluster.local
+```
+
+Within the Kubernetes cluster the `*.default.svc.cluster.local` domains will resolve
+to the service endpoints created in the previous step. The `*.example.com` domains
+can be forced to resolve to the external IPs of the auth and hello services by updating
+our local `/etc/hosts` file.
+
+Display the external IPs for the auth and hello services:
+
+```
+$ kubectl get svc
+```
+```
+NAME         CLUSTER_IP       EXTERNAL_IP       PORT(S)             SELECTOR    AGE
+auth         10.159.246.203   130.211.xxx.xxx   7800/TCP,7801/TCP   app=auth    45m
+hello        10.159.245.15    104.197.xxx.xxx   7900/TCP,7901/TCP   app=hello   45m
+kubernetes   10.159.240.1     <none>            443/TCP             <none>      5h
+```
+
+Append the following lines to your local `/etc/hosts` file:
+
+```
+130.211.xxx.xxx auth.example.com
+104.197.xxx.xxx hello.example.com
+```
+
+>> Be sure to subsitute '130.211.xxx.xxx' with the acutal external IP from your output.
 
 ## Get auth token
 
 ```
 $ /usr/local/bin/auth-client \
   -ca-cert ca.pem \
-  -server-addr auth.default.svc.cluster.local:7800 \
+  -server-addr auth.example.com:7800 \
   -username kelseyhightower
 ```
 
@@ -301,7 +347,7 @@ wrote /Users/kelseyhightower/.hello/client/.token
 ```
 $ /usr/local/bin/hello-client \
   -ca-cert ca.pem \
-  -server-addr hello.default.svc.cluster.local:7900 \
+  -server-addr hello.example.com:7900 \
   -tls-cert client.pem \
   -tls-key client-key.pem 
 ```

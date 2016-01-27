@@ -1,7 +1,8 @@
 {
-  "CN": "hello.kuar.io",
+  "CN": "hello.example.com",
   "hosts": [
     "127.0.0.1",
+    "hello.example.com",
     "hello.default.svc.cluster.local"
   ],
   "key": {
