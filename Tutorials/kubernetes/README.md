@@ -6,9 +6,6 @@ The following tutorial walks you through deploying the hello service gRPC collec
 
 * Kubernetes cluster running 1.1.x or greater
 * Google Cloud Platform account
-* kubectl
-* conf2kube
-* cfssl
 
 ### Creating a Kubernetes Cluster
 
@@ -73,7 +70,7 @@ This section will walk you through deploying the auth service using Kubernetes a
 
 ### Create the Auth Data Volume
 
-The auth service requires a presistent disk to store the user database backed by [boltDB](https://github.com/boltdb/bolt).
+The auth service requires a persistent disk to store the user database backed by [boltDB](https://github.com/boltdb/bolt).
 Create the GCE disk using the gcloud command line tool:
 
 ```
@@ -83,6 +80,14 @@ $ gcloud compute disks create auth-data
 ### Create the Auth Service Secrets
 
 The auth service requires a set of TLS certificates to serve secure connections between gRPC clients.
+In this section we will use the conf2kube utility to convert configuration files to Kubernetes
+secrets.
+
+Install the conf2kube utility:
+
+```
+$ go get github.com/kelseyhightower/conf2kube
+```
 
 #### Create the Auth Service TLS secrets
 
