@@ -330,7 +330,13 @@ Append the following lines to your local `/etc/hosts` file:
 
 > Be sure to subsitute '130.211.xxx.xxx' with the acutal external IP from your output.
 
-## Get auth token
+## Get an auth token
+
+Install the auth-client:
+
+```
+$ go get github.com/kelseyhightower/grpc-hello-service/auth-client
+```
 
 ```
 $ /usr/local/bin/auth-client \
@@ -344,6 +350,12 @@ wrote /Users/kelseyhightower/.hello/client/.token
 ```
 
 ## Say Hello
+
+Install the hello-client:
+
+```
+$ go get github.com/kelseyhightower/grpc-hello-service/hello-client
+```
 
 ```
 $ /usr/local/bin/hello-client \
