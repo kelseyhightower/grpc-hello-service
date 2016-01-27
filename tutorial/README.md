@@ -105,7 +105,7 @@ $ kubectl patch secret auth-tls \
   -p `conf2kube -n auth-tls -f ca.pem -k ca.pem`
 ```
 
-Run the `kubectl describe` command to display the details of the `auth-server-tls` secret:
+Run the `kubectl describe` command to display the details of the `auth-tls` secret:
 
 ```
 $ kubectl describe secrets auth-tls
