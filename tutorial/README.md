@@ -185,7 +185,7 @@ Create the `auth.db` user database. First jump into the container using the
 `kubectl exec` command:
 
 ```
-$ kubectl exec -i -t -p auth-xxxxx -c auth-server /bin/ash
+$ kubectl exec -i -t auth-xxxxx -c auth /bin/ash
 ```
 
 Next, create a new user using the `auth-admin` command:
