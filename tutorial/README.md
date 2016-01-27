@@ -1,13 +1,14 @@
 # Hello Service Deployment Tutorial
 
-## This is currently a work in progress and incomplete. ETA 1/28/2016
-
 The following tutorial walks you through deploying the hello service gRPC collection of micro-services.
 
 ## Prerequisites
 
-* A working Kubernetes cluster running 1.1.x or greater
-* A active Google Cloud Platform account
+* Kubernetes cluster running 1.1.x or greater
+* Google Cloud Platform account
+* kubectl
+* conf2kube
+* cfssl
 
 ### Creating a Kubernetes Cluster
 
