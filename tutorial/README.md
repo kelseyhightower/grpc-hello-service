@@ -132,7 +132,7 @@ $ conf2kube -n jwt-private-key -f jwt-key.pem -k key.pem | \
 ```
 
 ```
-$ conf2kube -n jwt-public-key -f jwt.pem -k jwt.pem | \
+$ conf2kube -n jwt-public-key -f jwt.pem -k cert.pem | \
   kubectl create -f -
 ```
 
@@ -273,11 +273,17 @@ key.pem:	1679 bytes
 $ kubectl create -f hello-controller.yaml
 ```
 
-## Get auth token
+## Expose the Auth and Hello Services
 
 ```
-$ kubectl port-forward auth-xxxxx 7801:7801 7800:7800
+$ kubectl create -f hello-service.yaml
 ```
+
+```
+$ kubectl create -f auth-service.yaml
+```
+
+## Get auth token
 
 ```
 auth-client -username kelseyhightower
@@ -287,20 +293,6 @@ auth-client -username kelseyhightower
 
 ```
 hello-client
-```
-
-```
-kubectl port-forward hello-xxxxx 7901:7901 7900:7900
-```
-
-## Create Services
-
-```
-$ kubectl create -f hello-service.yaml
-```
-
-```
-$ kubectl create -f auth-service.yaml
 ```
 
 
