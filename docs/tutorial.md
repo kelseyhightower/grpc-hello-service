@@ -38,6 +38,22 @@ scheduler            Healthy   ok                   nil
 etcd-0               Healthy   {"health": "true"}   nil
 ```
 
+## Generating TLS Certs
+
+The microservices in this tutorial are secured by TLS which requires TLS certificates.
+In addition to securing our gRPC services a TLS key pair will be used to sign and
+validate JWT tokens.
+
+Generate the required TLS certs by running the `generate-certs` script from the certs
+directory at the root of this project:
+
+```
+$ cd grpc-hello-service/certs
+```
+```
+$ ./generate-certs
+```
+
 ## Deploying the Auth Service
 
 The auth service is responsible for authenticating users and issuing JWT tokens that can be used to access other gRPC services.
@@ -56,34 +72,42 @@ $ gcloud compute disks create auth-data
 
 The auth service requires a set of TLS certificates to serve secure connections between gRPC clients.
 
-Create a Kubernetes secret using the conf2kube commandline tool:
+#### Create the Auth Service TLS secrets
+
+Create the `auth-tls` Kubernetes secret and store the auth service TLS private key
+as `key.pem` using conf2kube:
 
 ```
-$ conf2kube -n auth-server-tls -f auth-server-key.pem -k key.pem | \
+$ conf2kube -n auth-tls -f auth-key.pem -k key.pem | \
   kubectl create -f -
 ```
 
-Next, append the TLS server certificate and CA certificate to the `auth-server-tls` secret:
+Next, append the auth service TLS certificate and CA certificate to the `auth-tls` secret:
 
 ```
-$ kubectl patch secret auth-server-tls \
-  -p `conf2kube -n auth-server-tls -f auth-server.pem -k cert.pem`
+$ kubectl patch secret auth-tls \
+  -p `conf2kube -n auth-tls -f auth.pem -k cert.pem`
 ```
 
 ```
-$ kubectl patch secret auth-server-tls \
-  -p `conf2kube -n auth-server-tls -f ca.pem -k ca.pem`
+$ kubectl patch secret auth-tls \
+  -p `conf2kube -n auth-tls -f ca.pem -k ca.pem`
 ```
 
-The auth service also needs a RSA private key for signing JWT tokens. In this example we will
-reuse the server TLS key for signing tokens.
+#### Create the JWT secrets
 
-Append the TLS server certificate to the `auth-server-tls` secret using "jwt-key.pem" as
-key name:
+The auth service uses a RSA private key for signing JWT tokens.
+
+Create the `jwt-private-key` and `jwt-public-key` secrets using conf2kube:
 
 ```
-$ kubectl patch secret auth-server-tls \
-  -p `conf2kube -n auth-server-tls -f auth-server-key.pem -k jwt-key.pem`
+$ conf2kube -n jwt-private-key -f jwt-key.pem -k key.pem | \
+  kubectl create -f -
+```
+
+```
+$ conf2kube -n jwt-public-key -f jwt.pem -k jwt.pem | \
+  kubectl create -f -
 ```
 
 Run the `kubectl describe` command to display the details of the `auth-server-tls` secret:
