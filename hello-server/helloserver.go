@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 
+	pb "github.com/kelseyhightower/grpc-hello-service/hello"
+
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

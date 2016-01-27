@@ -286,15 +286,29 @@ $ kubectl create -f auth-service.yaml
 ## Get auth token
 
 ```
-auth-client -username kelseyhightower
+$ /usr/local/bin/auth-client \
+  -ca-cert ca.pem \
+  -server-addr auth.default.svc.cluster.local:7800 \
+  -username kelseyhightower
+```
+
+```
+wrote /Users/kelseyhightower/.hello/client/.token
 ```
 
 ## Say Hello
 
 ```
-hello-client
+$ /usr/local/bin/hello-client \
+  -ca-cert ca.pem \
+  -server-addr hello.default.svc.cluster.local:7900 \
+  -tls-cert client.pem \
+  -tls-key client-key.pem 
 ```
 
+```
+2016/01/26 19:49:38 Hello Kelsey (kelsey.hightower@gmail.com)
+```
 
 ## Cleanup
 
