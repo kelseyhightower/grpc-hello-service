@@ -2,32 +2,40 @@
 
 ## Build Statically Linked Linux Binaries
 
+### Auth Service
+
+The Auth service container requires the `auth-admin` and `auth-server`
+binaries. Build the binaries and save them to the auth-server directory: 
+
 ```
-$ GOOS=linux ./build
+$ GOOS=linux go build -a -o auth-server/auth-admin \
+  --ldflags '-extldflags "-static"' \
+  -tags netgo -installsuffix netgo \
+  ./auth-admin
 ```
 
 ```
-$ ls -1 bin/
+$ GOOS=linux go build -a -o auth-server/auth-server \
+  --ldflags '-extldflags "-static"' \
+  -tags netgo -installsuffix netgo \
+  ./auth-server
 ```
 
+### Hello Service
+
+The Hello service container requires the `hello-server` binary. Build the
+binary and save it to the hello-server directory:
+
 ```
-auth-admin
-auth-client
-auth-server
-hello-client
-hello-server
+$ GOOS=linux go build -a -o hello-server/hello-server \
+  --ldflags '-extldflags "-static"' \
+  -tags netgo -installsuffix netgo \
+  ./hello-server
 ```
 
 ## Building Docker Images
 
 ### Auth Service
-
-The Auth service container requires the `auth-admin` and `auth-server`
-binaries. Copy the binaries to the auth-server directory: 
-
-```
-$ cp bin/auth-admin bin/auth-server auth-server
-```
 
 Build the `auth-server` Docker image:
 
@@ -44,13 +52,6 @@ $ docker push kelseyhightower/auth-server:1.0.0
 ```
 
 ### Hello Service
-
-The Hello service container requires the `hello-server` binary. Copy the
-binary to the hello-server directory:
-
-```
-$ cp bin/hello-server hello-server/
-```
 
 Build the `hello-server` Docker image:
 
