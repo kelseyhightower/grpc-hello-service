@@ -1,5 +1,5 @@
 FROM busybox
 MAINTAINER Kelsey Hightower <kelsey.hightower@gmail.com>
-ADD auth-server auth-server
-ADD auth-admin auth-admin
+COPY auth-server auth-server
+COPY auth-admin auth-admin
 ENTRYPOINT ["/auth-server"]
