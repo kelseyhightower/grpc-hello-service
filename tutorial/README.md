@@ -175,7 +175,7 @@ $ kubectl get pods --watch
 Once the auth server pod is up and running view the logs using the `kubectl logs` command:
 
 ```
-$ kubectl logs auth-server-xxxx
+$ kubectl logs auth-xxxx
 ```
 
 Notice the auth service is waiting on the auth.db user database file. This file
@@ -185,7 +185,7 @@ Create the `auth.db` user database. First jump into the container using the
 `kubectl exec` command:
 
 ```
-$ kubectl exec -i -t -p auth-server-xxxxx -c auth-server /bin/ash
+$ kubectl exec -i -t -p auth-xxxxx -c auth-server /bin/ash
 ```
 
 Next, create a new user using the `auth-admin` command:
@@ -208,7 +208,7 @@ command again to verify the auth service as started successfully:
 
 
 ```
-$ kubectl logs auth-server-xxxx
+$ kubectl logs auth-xxxx
 ```
 
 ##  Deploying the Hello Server
@@ -225,27 +225,22 @@ Deployment Requirements:
 ### Create Hello Server Secrets
 
 ```
-$ conf2kube -n hello-server-tls -f hello-server-key.pem -k key.pem | \
+$ conf2kube -n hello-tls -f hello-key.pem -k key.pem | \
   kubectl create -f -
 ```
 
 ```
-$ kubectl patch secret hello-server-tls \
-  -p `conf2kube -n hello-server-tls -f hello-server.pem -k cert.pem`
+$ kubectl patch secret hello-tls \
+  -p `conf2kube -n hello-tls -f hello.pem -k cert.pem`
 ```
 
 ```
-$ kubectl patch secret hello-server-tls \
-  -p `conf2kube -n hello-server-tls -f ca.pem -k ca.pem`
+$ kubectl patch secret hello-tls \
+  -p `conf2kube -n hello-tls -f ca.pem -k ca.pem`
 ```
 
 ```
-$ kubectl patch secret hello-server-tls \
-  -p `conf2kube -n hello-server-tls -f auth-server.pem -k jwt.pem`
-```
-
-```
-$ kubectl describe secrets hello-server-tls
+$ kubectl describe secrets hello-tls
 ```
 
 ### Create Hello Server Replication Controller
@@ -257,7 +252,7 @@ $ kubectl create -f hello-controller.yaml
 ## Get auth token
 
 ```
-$ kubectl port-forward auth-server-xxxxx 7801:7801 7800:7800
+$ kubectl port-forward auth-xxxxx 7801:7801 7800:7800
 ```
 
 ```
@@ -271,7 +266,7 @@ hello-client
 ```
 
 ```
-kubectl port-forward hello-server-xxxxx 7901:7901 7900:7900
+kubectl port-forward hello-xxxxx 7901:7901 7900:7900
 ```
 
 ## Create Services
@@ -293,19 +288,19 @@ hello service Kubernetes objects:
 Delete the replication controllers:
 
 ```
-$ kubectl delete rc hello-server auth-server
+$ kubectl delete rc hello auth
 ```
 
 Delete the services:
 
 ```
-$ kubectl delete svc auth-server hello-server
+$ kubectl delete svc auth hello
 ```
 
 Delete the secrets:
 
 ```
-$ kubectl delete secrets auth-server-tls hello-server-tls
+$ kubectl delete secrets auth-tls hello-tls jwt-public-key jwt-private-key
 ```
 
 Delete the auth service data volume:
