@@ -2,10 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    name: hello-server
-  name: hello-server
+    app: hello
+  name: hello
 spec:
-  clusterIP: 10.163.240.101
   ports:
     - name: grpc
       port: 7900
@@ -14,4 +13,5 @@ spec:
       port: 7901
       targetPort: 7901
   selector:
-    name: hello-server
+    app: hello
+  type: LoadBalancer

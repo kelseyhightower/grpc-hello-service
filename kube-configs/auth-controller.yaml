@@ -1,25 +1,25 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: auth-server
+  name: auth
 spec:
   replicas: 1
   selector:
-    name: auth-server
+    app: auth
   template:
     metadata:
       labels:
-        name: auth-server
+        app: auth
     spec:
       containers:
-      - name: auth-server
+      - name: auth
         image: kelseyhightower/auth-server:1.0.0
         command:
           - "/auth-server"
         args:
           - "-debug-listen-addr=0.0.0.0:7801"
           - "-listen-addr=0.0.0.0:7800"
-          - "-jwt-private-key=/tls/jwt-key.pem"
+          - "-jwt-private-key=/jwt/key.pem"
           - "-tls-key=/tls/key.pem"
           - "-tls-cert=/tls/cert.pem"
         ports:
@@ -32,15 +32,20 @@ spec:
             cpu: 0.2
             memory: "100Mi"
         volumeMounts:
-          - name: "auth-server-tls"
+          - name: "auth-tls"
             readOnly: true
             mountPath: "/tls"
           - name: "auth-data"
             mountPath: "/var/lib"
+          - name: "jwt-private-key"
+            mountPath: "/jwt"
       volumes:
-        - name: "auth-server-tls"
+        - name: "auth-tls"
           secret:
-            secretName: "auth-server-tls"
+            secretName: "auth-tls"
+        - name: "jwt-private-key"
+          secret:
+            secretName: "jwt-private-key"
         - name: "auth-data"
           gcePersistentDisk:
             pdName: auth-data

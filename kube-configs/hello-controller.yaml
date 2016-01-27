@@ -1,18 +1,18 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: hello-server
+  name: hello
 spec:
   replicas: 1
   selector:
-    name: hello-server
+    app: hello
   template:
     metadata:
       labels:
-        name: hello-server
+        app: hello
     spec:
       containers:
-      - name: hello-server
+      - name: hello
         image: kelseyhightower/hello-server:1.0.0
         command:
           - "/hello-server"
@@ -22,7 +22,7 @@ spec:
           - "-ca-cert=/tls/ca.pem"
           - "-tls-key=/tls/key.pem"
           - "-tls-cert=/tls/cert.pem"
-          - "-jwt-public-key=/tls/jwt.pem"
+          - "-jwt-public-key=/jwt/cert.pem"
         ports:
           - name: grpc
             containerPort: 7900
@@ -31,12 +31,18 @@ spec:
         resources:
           limits:
             cpu: 0.2
-            memory: "100Mi"
+            memory: "20Mi"
         volumeMounts:
-          - name: "hello-server-tls"
+          - name: "hello-tls"
             readOnly: true
             mountPath: "/tls"
+          - name: "jwt-public-key"
+            readOnly: true
+            mountPath: "/jwt"
       volumes:
-        - name: "hello-server-tls"
+        - name: "hello-tls"
           secret:
-            secretName: "hello-server-tls"
+            secretName: "hello-tls"
+        - name: "jwt-public-key"
+          secret:
+            secretName: "jwt-public-key"
