@@ -11,6 +11,10 @@
       "client": {
         "usages": ["signing","key encipherment","client auth"],
         "expiry": "8760h"
+      },
+      "signing": {
+         "usages": ["signing","key encipherment"],
+         "expiry": "8760h"
       }
     }
   }

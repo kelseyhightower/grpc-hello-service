@@ -1,6 +1,6 @@
 {
   "CN": "JWT Signing",
-  "hosts": [],
+  "hosts": [""],
   "key": {
     "algo": "rsa",
     "size": 2048
