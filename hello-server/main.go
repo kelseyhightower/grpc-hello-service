@@ -38,6 +38,8 @@ func main() {
 	)
 	flag.Parse()
 
+	log.Println("Hello service starting...")
+
 	cert, err := tls.LoadX509KeyPair(*tlsCert, *tlsKey)
 	if err != nil {
 		log.Fatal(err)
@@ -76,5 +78,7 @@ func main() {
 	go gs.Serve(ln)
 
 	trace.AuthRequest = func(req *http.Request) (any, sensitive bool) { return true, true }
+
+	log.Println("Hello service started successfully.")
 	log.Fatal(http.ListenAndServe(*debugListenAddr, nil))
 }
