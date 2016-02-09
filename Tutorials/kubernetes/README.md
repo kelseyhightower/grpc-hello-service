@@ -341,6 +341,10 @@ Append the following lines to your local `/etc/hosts` file:
 
 ## Get an auth token
 
+```
+$ mkdir $HOME/.hello/client/token
+```
+
 Install the auth-client:
 
 ```
@@ -348,7 +352,7 @@ $ go get github.com/kelseyhightower/grpc-hello-service/auth-client
 ```
 
 ```
-$ /usr/local/bin/auth-client \
+$ auth-client \
   -ca-cert ca.pem \
   -server-addr auth.example.com:7800 \
   -username kelseyhightower
@@ -367,7 +371,7 @@ $ go get github.com/kelseyhightower/grpc-hello-service/hello-client
 ```
 
 ```
-$ /usr/local/bin/hello-client \
+$ hello-client \
   -ca-cert ca.pem \
   -server-addr hello.example.com:7900 \
   -tls-cert client.pem \
