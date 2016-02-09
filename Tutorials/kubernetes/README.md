@@ -407,6 +407,16 @@ $ kubectl delete secrets auth-tls hello-tls jwt-public-key jwt-private-key
 
 Delete the auth service data volume:
 
+After the auth replication controller is deleted you'll be able to remove the `auth-data` volume once the it's no longer in use -- you may have to wait up to 1 minute after the auth controller is deleted. 
+
 ```
 $ gcloud compute disks delete auth-data
+```
+
+Delete the Kubernetes cluster:
+
+If you wanted to avoid being charged for the Kubernetes cluster used in this tutorial run the following command to delete it:
+
+```
+$ gcloud container clusters create hello-tutorial
 ```
