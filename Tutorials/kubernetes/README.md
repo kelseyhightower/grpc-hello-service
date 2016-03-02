@@ -418,5 +418,5 @@ Delete the Kubernetes cluster:
 If you wanted to avoid being charged for the Kubernetes cluster used in this tutorial run the following command to delete it:
 
 ```
-$ gcloud container clusters create hello-tutorial
+$ gcloud container clusters delete hello-tutorial
 ```
