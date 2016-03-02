@@ -342,7 +342,7 @@ Append the following lines to your local `/etc/hosts` file:
 ## Get an auth token
 
 ```
-$ mkdir $HOME/.hello/client/token
+$ mkdir -p $HOME/.hello/client/token
 ```
 
 Install the auth-client:
