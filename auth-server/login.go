@@ -10,6 +10,8 @@ import (
 	"io/ioutil"
 	"time"
 
+	"database/sql"
+
 	pb "github.com/kelseyhightower/grpc-hello-service/auth"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -18,7 +20,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"github.com/boltdb/bolt"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -39,7 +40,7 @@ func NewAuthServer(rsaPrivateKey string) (*authServer, error) {
 }
 
 func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
-	user, err := getUser(boltdb, request.Username)
+	user, err := getUser(db, request.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -64,15 +65,23 @@ func (as *authServer) Login(ctx context.Context, request *pb.LoginRequest) (*pb.
 	return &pb.LoginResponse{tokenString}, nil
 }
 
-func getUser(db *bolt.DB, username string) (*pb.User, error) {
+func getUser(db *sql.DB, username string) (*pb.User, error) {
 	user := &pb.User{}
 	var rawUser []byte
-	err := db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("users"))
-		rawUser = b.Get([]byte(username))
-		return nil
-	})
+
+	rows, err := db.Query("SELECT proto FROM users WHERE username=?", username)
 	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&rawUser); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 

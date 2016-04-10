@@ -5,11 +5,16 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"database/sql"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 
-	"github.com/boltdb/bolt"
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/ssh/terminal"
@@ -48,28 +53,32 @@ func main() {
 		log.Fatal("marshaling error: ", err)
 	}
 
-	db, err := bolt.Open("/var/lib/auth.db", 0600, nil)
+	certPool := x509.NewCertPool()
+	pem, err := ioutil.ReadFile("/etc/auth/server-ca.pem")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-
-	err = db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("users"))
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
-		}
-		return nil
+	if ok := certPool.AppendCertsFromPEM(pem); !ok {
+		log.Fatal("Failed to append PEM.")
+	}
+	clientCert := make([]tls.Certificate, 0, 1)
+	certs, err := tls.LoadX509KeyPair("/etc/auth/client-cert.pem", "/etc/auth/client-key.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	clientCert = append(clientCert, certs)
+	mysql.RegisterTLSConfig("custom", &tls.Config{
+		ServerName:   "hightowerlabs:database",
+		RootCAs:      certPool,
+		Certificates: clientCert,
 	})
+
+	db, err := sql.Open("mysql", "auth:grpcauth@tcp(104.196.125.211:3306)/auth?tls=custom")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("users"))
-		err := b.Put([]byte(user.Username), data)
-		return err
-	})
+	_, err = db.Exec("INSERT INTO users (username, proto) VALUES (?, ?)", user.Username, data)
 	if err != nil {
 		log.Fatal(err)
 	}

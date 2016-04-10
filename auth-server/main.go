@@ -5,54 +5,94 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"database/sql"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	pb "github.com/kelseyhightower/grpc-hello-service/auth"
-	healthpb "google.golang.org/grpc/health/grpc_health_v1alpha"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"github.com/boltdb/bolt"
+	"github.com/go-sql-driver/mysql"
 	"golang.org/x/net/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
 )
 
-func withConfigDir(path string) string {
-	return filepath.Join(os.Getenv("HOME"), ".hello", "server", path)
-}
-
-var boltdb *bolt.DB
+var db *sql.DB
 
 func main() {
 	var (
+		dbUser          = flag.String("db-user", "auth", "Auth database username.")
+		dbPasswd        = flag.String("db-pass", "", "Auth database password.")
+		dbHost          = flag.String("db-host", "", "Auth database host.")
+		dbPort          = flag.String("db-port", "3306", "Auth database port.")
+		dbServerName    = flag.String("db-server-name", "", "Auth database server name.")
+		dbServerCACert  = flag.String("db-server-ca-cert", "/etc/auth/db-server-ca.pem", "Database server ca certificate")
+		dbClientCert    = flag.String("db-client-cert", "/etc/auth/db-client-cert.pem", "Database client certificate.")
+		dbClientKey     = flag.String("db-client-key", "/etc/auth/db-client-key.pem", "Database client key.")
 		debugListenAddr = flag.String("debug-listen-addr", "127.0.0.1:7801", "HTTP listen address.")
 		listenAddr      = flag.String("listen-addr", "127.0.0.1:7800", "HTTP listen address.")
-		tlsCert         = flag.String("tls-cert", withConfigDir("cert.pem"), "TLS server certificate.")
-		tlsKey          = flag.String("tls-key", withConfigDir("key.pem"), "TLS server key.")
-		jwtPrivateKey   = flag.String("jwt-private-key", withConfigDir("jwt-key.pem"), "The RSA private key to use for signing JWTs")
+		tlsCert         = flag.String("tls-cert", "/etc/auth/cert.pem", "TLS server certificate.")
+		tlsKey          = flag.String("tls-key", "/etc/auth/key.pem", "TLS server key.")
+		jwtPrivateKey   = flag.String("jwt-private-key", "/etc/auth/jwt-key.pem", "The RSA private key to use for signing JWTs")
 	)
 	flag.Parse()
 
 	var err error
 	log.Println("Auth service starting...")
-	for {
-		_, err := os.Open("/var/lib/auth.db")
-		if !os.IsNotExist(err) {
-			break
-		}
-		log.Println("missing auth database, retrying in 5 secs.")
-		time.Sleep(5 * time.Second)
-	}
 
-	boltdb, err = bolt.Open("/var/lib/auth.db", 0600, nil)
+	certPool := x509.NewCertPool()
+	pem, err := ioutil.ReadFile(*dbServerCACert)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if ok := certPool.AppendCertsFromPEM(pem); !ok {
+		log.Fatal("Failed to append PEM.")
+	}
+	clientCert := make([]tls.Certificate, 0, 1)
+	certs, err := tls.LoadX509KeyPair(*dbClientCert, *dbClientKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	clientCert = append(clientCert, certs)
+	mysql.RegisterTLSConfig("custom", &tls.Config{
+		ServerName:   *dbServerName,
+		RootCAs:      certPool,
+		Certificates: clientCert,
+	})
+
+	dbAddr := net.JoinHostPort(*dbHost, *dbPort)
+	dbConfig := mysql.Config{
+		User:      *dbUser,
+		Passwd:    *dbPasswd,
+		Net:       "tcp",
+		Addr:      dbAddr,
+		DBName:    "auth",
+		TLSConfig: "custom",
+	}
+
+	for {
+		db, err = sql.Open("mysql", dbConfig.FormatDSN())
+		if err != nil {
+			goto dberror
+		}
+		err = db.Ping()
+		if err != nil {
+			goto dberror
+		}
+		break
+
+	dberror:
+		log.Println(err)
+		log.Println("error connecting to the auth database, retrying in 5 secs.")
+		time.Sleep(5 * time.Second)
 	}
 
 	ta, err := credentials.NewServerTLSFromFile(*tlsCert, *tlsKey)
