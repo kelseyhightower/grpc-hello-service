@@ -13,7 +13,7 @@ The following tutorial walks you through deploying the hello service gRPC collec
 The easiest way to get a Kubernetes cluster is to use GKE:
 
 ```
-$ gcloud container clusters create hello-tutorial
+$ gcloud container clusters create hello-tutorial --zone <<ex, us-west1-a>>
 ```
 
 At this point you should have a 3 node kubernetes cluster. Run the following command
